@@ -38,7 +38,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.3"
+Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.4"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -430,7 +430,7 @@ autoAttackBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 修改後的幫助模式功能（確保等待1.5秒後才執行操作）
+-- 修改後的幫助模式功能
 helpBtn.MouseButton1Click:Connect(function()
     isHelpEnabled = not isHelpEnabled
     helpBtn.Text = isHelpEnabled and "幫助模式: 開" or "幫助模式: 關"
@@ -466,11 +466,13 @@ helpBtn.MouseButton1Click:Connect(function()
                 end
                 
                 pcall(function()
-                    -- 傳送到 Lobby.Teleport1
-                    local teleport1 = Workspace.Lobby:FindFirstChild("Teleport1")
-                    if teleport1 and isHelpEnabled then
-                        humanoidRootPart.CFrame = teleport1.CFrame
-                        task.wait(0.3)
+                    -- 只在"被打後重置"模式下才傳送到 Lobby.Teleport1
+                    if helpMode == "被打後重置" then
+                        local teleport1 = Workspace.Lobby:FindFirstChild("Teleport1")
+                        if teleport1 and isHelpEnabled then
+                            humanoidRootPart.CFrame = teleport1.CFrame
+                            task.wait(0.3)
+                        end
                     end
                     
                     -- 持續跟隨目標玩家到前方
@@ -492,9 +494,14 @@ helpBtn.MouseButton1Click:Connect(function()
                                 if currentTime - lastHitTime > 2 then
                                     lastHitTime = currentTime
                                     
-                                    -- 修改：確保等待1.5秒後才執行操作
-                                    print("被打中，等待1.5秒後執行操作...")
-                                    task.wait(1.5)
+                                    -- 根據選擇的模式決定等待時間
+                                    if helpMode == "被打後重置" then
+                                        print("被打中，等待1.5秒後執行重置操作...")
+                                        task.wait(1.5)
+                                    else
+                                        print("被打中，等待0.2秒後繼續...")
+                                        task.wait(0.2)
+                                    end
                                     
                                     -- 再次檢查是否仍在遊戲中且模式開啟
                                     if not isHelpEnabled or not character.Parent then
@@ -541,12 +548,12 @@ helpBtn.MouseButton1Click:Connect(function()
                                               newCharacter:FindFirstChild("Humanoid") and newCharacter.Humanoid.Health > 0
                                         
                                         task.wait(0.3)
+                                        -- 重置後需要重新開始整個循環
+                                        break
                                     else
-                                        -- 被打後不重置模式 - 只是短暫等待後繼續
-                                        task.wait(1)
+                                        -- 被打後不重置模式 - 繼續跟隨不做任何額外操作
+                                        print("被打後不重置模式，繼續跟隨目標...")
                                     end
-                                    
-                                    break
                                 end
                             end
                             
@@ -606,4 +613,3 @@ end)
 
 -- 預設顯示巫毒精通區域
 VoodooSection.Visible = true
-
