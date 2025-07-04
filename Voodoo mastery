@@ -38,7 +38,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.1"
+Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.2"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -373,7 +373,7 @@ local helpBtn = createButton("幫助模式: 關", 3, VoodooSection, 50)
 -- 幫助模式下拉選單
 local helpModeDropdown, helpModeBtn = createDropdown({"被打後重置", "被打後不重置"}, VoodooSection, UDim2.new(0.5, -90, 0, 160))
 
--- 修改後的自動攻擊功能
+-- 修改後的自動攻擊功能 (將0.8改為0.6，1.5改為1.2)
 autoAttackBtn.MouseButton1Click:Connect(function()
     isAutoAttackEnabled = not isAutoAttackEnabled
     autoAttackBtn.Text = isAutoAttackEnabled and "自動攻擊: 開" or "自動攻擊: 關"
@@ -386,7 +386,7 @@ autoAttackBtn.MouseButton1Click:Connect(function()
                     pcall(function()
                         -- 第一步：執行GeneralAbility
                         ReplicatedStorage.GeneralAbility:FireServer()
-                        task.wait(0.8)
+                        task.wait(0.6)  -- 修改：從0.8改為0.6
                         
                         -- 第二步：攻擊Torso
                         if nearestPlayer.Character:FindFirstChild("Torso") then
@@ -395,7 +395,7 @@ autoAttackBtn.MouseButton1Click:Connect(function()
                             }
                             ReplicatedStorage.GeneralHit:FireServer(unpack(args))
                         end
-                        task.wait(0.8)
+                        task.wait(0.6)  -- 修改：從0.8改為0.6
                         
                         -- 第三步：攻擊DOLLPART
                         if nearestPlayer.Character:FindFirstChild("DOLLPART") then
@@ -404,11 +404,11 @@ autoAttackBtn.MouseButton1Click:Connect(function()
                             }
                             ReplicatedStorage.GeneralHit:FireServer(unpack(args))
                         end
-                        task.wait(0.8)
+                        task.wait(0.6)  -- 修改：從0.8改為0.6
                     end)
                     
-                    -- 循環結束後等待1.5秒
-                    task.wait(1.5)
+                    -- 循環結束後等待1.2秒 (修改：從1.5改為1.2)
+                    task.wait(1.2)
                     
                     -- 持續檢查40單位內是否有目標，直到找到為止
                     while isAutoAttackEnabled do
@@ -430,7 +430,7 @@ autoAttackBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 修改後的幫助模式功能（移動到目標前方但不從上方掉下來）
+-- 修改後的幫助模式功能（確保等待1.5秒後才執行操作）
 helpBtn.MouseButton1Click:Connect(function()
     isHelpEnabled = not isHelpEnabled
     helpBtn.Text = isHelpEnabled and "幫助模式: 開" or "幫助模式: 關"
@@ -492,8 +492,14 @@ helpBtn.MouseButton1Click:Connect(function()
                                 if currentTime - lastHitTime > 2 then
                                     lastHitTime = currentTime
                                     
-                                    -- 等待1.5秒後才執行操作
+                                    -- 修改：確保等待1.5秒後才執行操作
+                                    print("被打中，等待1.5秒後執行操作...")
                                     task.wait(1.5)
+                                    
+                                    -- 再次檢查是否仍在遊戲中且模式開啟
+                                    if not isHelpEnabled or not character.Parent then
+                                        break
+                                    end
                                     
                                     -- 根據選擇的模式執行不同操作
                                     if helpMode == "被打後重置" then
@@ -600,3 +606,4 @@ end)
 
 -- 預設顯示巫毒精通區域
 VoodooSection.Visible = true
+
