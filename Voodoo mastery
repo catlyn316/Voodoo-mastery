@@ -38,7 +38,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨"
+Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.1"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -336,7 +336,7 @@ local autoAttackLoop = nil
 local isHelpEnabled = false
 local helpLoop = nil
 
--- 找到最近的玩家
+-- 找到最近的玩家（限制在40單位內）
 local function findNearestPlayer()
     local nearestPlayer = nil
     local shortestDistance = math.huge
@@ -351,7 +351,7 @@ local function findNearestPlayer()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local distance = (player.Character.HumanoidRootPart.Position - localPosition).Magnitude
-            if distance < shortestDistance then
+            if distance <= 40 and distance < shortestDistance then
                 shortestDistance = distance
                 nearestPlayer = player
             end
@@ -373,7 +373,7 @@ local helpBtn = createButton("幫助模式: 關", 3, VoodooSection, 50)
 -- 幫助模式下拉選單
 local helpModeDropdown, helpModeBtn = createDropdown({"被打後重置", "被打後不重置"}, VoodooSection, UDim2.new(0.5, -90, 0, 160))
 
--- 自動攻擊功能
+-- 修改後的自動攻擊功能
 autoAttackBtn.MouseButton1Click:Connect(function()
     isAutoAttackEnabled = not isAutoAttackEnabled
     autoAttackBtn.Text = isAutoAttackEnabled and "自動攻擊: 開" or "自動攻擊: 關"
@@ -406,8 +406,21 @@ autoAttackBtn.MouseButton1Click:Connect(function()
                         end
                         task.wait(0.8)
                     end)
+                    
+                    -- 循環結束後等待1.5秒
+                    task.wait(1.5)
+                    
+                    -- 持續檢查40單位內是否有目標，直到找到為止
+                    while isAutoAttackEnabled do
+                        local nextTarget = findNearestPlayer()
+                        if nextTarget then
+                            break -- 找到目標，跳出等待循環
+                        end
+                        task.wait(0.5) -- 沒找到目標，等待0.5秒後再檢查
+                    end
                 else
-                    task.wait(1)
+                    -- 如果沒有找到目標，等待0.5秒後再檢查
+                    task.wait(0.5)
                 end
             end
         end)
@@ -417,7 +430,7 @@ autoAttackBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 幫助模式功能
+-- 修改後的幫助模式功能（移動到目標前方但不從上方掉下來）
 helpBtn.MouseButton1Click:Connect(function()
     isHelpEnabled = not isHelpEnabled
     helpBtn.Text = isHelpEnabled and "幫助模式: 開" or "幫助模式: 關"
@@ -460,13 +473,13 @@ helpBtn.MouseButton1Click:Connect(function()
                         task.wait(0.3)
                     end
                     
-                    -- 持續跟隨目標玩家
+                    -- 持續跟隨目標玩家到前方
                     local targetPlayer = Players:FindFirstChild(targetName)
                     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") and isHelpEnabled then
                         local playerWorkspaceFolder = Workspace:FindFirstChild(LocalPlayer.Name)
                         local lastUpdateTime = tick()
                         
-                        -- 持續移動直到檢測到LastSlappedBy
+                        -- 持續移動到目標前方直到檢測到LastSlappedBy
                         local lastHitTime = 0
                         while isHelpEnabled and character.Parent and humanoid.Health > 0 and playerWorkspaceFolder do
                             
@@ -547,7 +560,9 @@ helpBtn.MouseButton1Click:Connect(function()
                                 local targetPos = targetRoot.Position
                                 local targetLookDirection = targetRoot.CFrame.LookVector
                                 
-                                local newPos = targetPos + (targetLookDirection * 5) + Vector3.new(0, 2, 0)
+                                -- 計算目標前方位置（保持與目標相同的Y軸高度）
+                                local newPos = targetPos + (targetLookDirection * 5)
+                                newPos = Vector3.new(newPos.X, targetPos.Y, newPos.Z) -- 保持目標的Y軸高度
                                 
                                 if (humanoidRootPart.Position - newPos).Magnitude > 1 then
                                     humanoidRootPart.CFrame = CFrame.new(newPos, newPos + targetLookDirection)
