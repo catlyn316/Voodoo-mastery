@@ -38,7 +38,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.2"
+Title.Text = "✨ 貓玲的腳本區 巫毒精通 ✨v0.3"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -373,7 +373,7 @@ local helpBtn = createButton("幫助模式: 關", 3, VoodooSection, 50)
 -- 幫助模式下拉選單
 local helpModeDropdown, helpModeBtn = createDropdown({"被打後重置", "被打後不重置"}, VoodooSection, UDim2.new(0.5, -90, 0, 160))
 
--- 修改後的自動攻擊功能 (將0.8改為0.6，1.5改為1.2)
+-- 修改後的自動攻擊功能 (將0.8改為0.6)
 autoAttackBtn.MouseButton1Click:Connect(function()
     isAutoAttackEnabled = not isAutoAttackEnabled
     autoAttackBtn.Text = isAutoAttackEnabled and "自動攻擊: 開" or "自動攻擊: 關"
@@ -407,8 +407,8 @@ autoAttackBtn.MouseButton1Click:Connect(function()
                         task.wait(0.6)  -- 修改：從0.8改為0.6
                     end)
                     
-                    -- 循環結束後等待1.2秒 (修改：從1.5改為1.2)
-                    task.wait(1.2)
+                    -- 循環結束後等待1.5秒
+                    task.wait(1.5)
                     
                     -- 持續檢查40單位內是否有目標，直到找到為止
                     while isAutoAttackEnabled do
